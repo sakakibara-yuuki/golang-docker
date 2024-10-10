@@ -5,6 +5,10 @@
 - curl(optional)
 
 ## How to run
+以下でリポジトリをクローンします。
+```bash
+git clone git@github.com:sakakibara-yuuki/golang-docker.git
+```
 
 次で実行できます。
 
