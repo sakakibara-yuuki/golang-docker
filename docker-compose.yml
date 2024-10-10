@@ -1,4 +1,25 @@
 services:
+
+  app:
+    build:
+      context: .
+      target: product
+    volumes:
+      - ./web-service-gin:/web-service-gin
+    environment:
+      DBUSER: ${DBUSER}
+      DBPASS: ${DBPASS}
+    tty: true
+    stdin_open: true
+    command: "/usr/local/bin/myapp"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    # networks:
+    #   - backend
+
   db:
     image: mysql
     restart: always
@@ -7,29 +28,18 @@ services:
       DBPASS: ${DBPASS}
       MYSQL_ROOT_PASSWORD: ${DBPASS}
       MYSQL_DATABASE: myapp
-    ports:
-      - "8080:8080"
     tty: true
     volumes:
       - ./web-service-gin/sql/create_album.sql:/docker-entrypoint-initdb.d/01_create_album.sql
       - ./web-service-gin/sql/album_seed.sql:/docker-entrypoint-initdb.d/02_album_seed.sql
-      - ./web-service-gin:/app/
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DBUSER}", "-p${DBPASS}"]
       interval: 30s
       timeout: 5s
       retries: 5
+    # networks:
+    #   - backend
 
-  web:
-    build: .
-    volumes:
-      - ./web-service-gin:/app
-    environment:
-      DBUSER: ${DBUSER}
-      DBPASS: ${DBPASS}
-    tty: true
-    stdin_open: true
-    # entrypoint: /bin/bash docker-entrypoint.sh
-    depends_on:
-      db:
-        condition: service_healthy
+# networks:
+#   backend:
+#     driver: bridge
